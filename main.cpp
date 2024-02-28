@@ -1,19 +1,5 @@
 #include <iostream>
-#include <filesystem>
-#include <vector>
-
-namespace fs = std::filesystem;
-
-std::vector<fs::path> getFilesInDirectory(const fs::path& directoryPath) {
-  std::vector<fs::path> filesList;
-  for (const auto& entry : fs::recursive_directory_iterator(directoryPath)) {
-    if (fs::is_regular_file(entry)) {
-      filesList.push_back(entry.path());
-    }
-  }
-
-  return filesList;
-}
+#include "utility.h"
 
 int main(int argc, const char** argv)
 {
@@ -24,15 +10,18 @@ int main(int argc, const char** argv)
     return -1;
   }
 
-  const fs::path directoryPath = argv[1];
+  const std::filesystem::path directoryPath = argv[1];
 
-  std::vector<fs::path> files = getFilesInDirectory(directoryPath);
+  const auto similarFileSets = findSimilarFileSets(directoryPath);
 
-  std::cout << "Files in directory and subdirectories:" << std::endl;
+  for (const auto& fileSet: similarFileSets)
+  {
+    for (const auto& file: fileSet)
+      std::cout << file << "\n";
 
-  for (const auto& file : files) {
-    std::cout << file << std::endl;
+    std::cout << "---------------------------------\n";
   }
 
   return 0;
 }
+
