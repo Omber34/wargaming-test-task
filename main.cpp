@@ -11,15 +11,22 @@ int main(int argc, const char** argv)
   }
 
   const std::filesystem::path directoryPath = argv[1];
-
-  const auto similarFileSets = findSimilarFileSets(directoryPath);
-
-  for (const auto& fileSet: similarFileSets)
+  try
   {
-    for (const auto& file: fileSet)
-      std::cout << file << "\n";
+    const auto similarFileSets = findSimilarFileSets(directoryPath);
 
-    std::cout << "---------------------------------\n";
+    for (const auto& fileSet: similarFileSets)
+    {
+      for (const auto& file: fileSet)
+        std::cout << file << "\n";
+
+      std::cout << "---------------------------------\n";
+    }
+  }
+  catch (const std::logic_error& error)
+  {
+    std::cerr << error.what() << "\n";
+    return -2;
   }
 
   return 0;

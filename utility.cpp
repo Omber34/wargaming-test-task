@@ -1,6 +1,11 @@
 #include "utility.h"
 #include <fstream>
 #include <map>
+
+#include <string>
+#include <future>
+#include <vector>
+
 #include "md5.h"
 
 namespace
@@ -14,16 +19,20 @@ namespace
     if (!file.is_open())
       throw std::logic_error("Can't open file: " + filePath.string() + ".");
 
-    file.seekg(0, std::ios::end);
-    auto fileSize = file.tellg();
-
+    const auto fragmentSize = 512U;
     std::string fileContent;
-    fileContent.resize(fileSize);
+    fileContent.resize(fragmentSize);
+    MD5 hash;
 
-    file.seekg(0, std::ios::beg);
-    file.read(&fileContent[0], fileSize);
+    while (!file.eof())
+    {
+      file.read(&fileContent[0], fragmentSize);
+      const auto readSize = file.gcount();
+      hash.update(fileContent.c_str(), readSize);
+    }
+    hash.finalize();
 
-    return MD5(fileContent).hexdigest();
+    return hash.hexdigest();
   }
 
   std::vector<fs::path> getAbsPathsInDirectory(const fs::path& directoryPath) {
@@ -36,7 +45,6 @@ namespace
 
     return filesList;
   }
-
 }
 
 std::vector<std::vector<std::filesystem::path>> findSimilarFileSets(const std::filesystem::path &directoryPath)

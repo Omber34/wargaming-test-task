@@ -285,7 +285,7 @@ void MD5::update(const unsigned char input[], size_type length)
 
 //////////////////////////////
 
-// for convenience provide a verson with signed char
+// for convenience provide a version with signed char
 void MD5::update(const char input[], size_type length)
 {
   update((const unsigned char*)input, length);
@@ -293,7 +293,7 @@ void MD5::update(const char input[], size_type length)
 
 //////////////////////////////
 
-// MD5 finalization. Ends an MD5 message-digest operation, writing the
+// MD5 finalization. Ends an MD5 message-digest operation, writing
 // the message digest and zeroizing the context.
 MD5& MD5::finalize()
 {
