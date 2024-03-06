@@ -1,23 +1,30 @@
 #include "utility.h"
-#include <fstream>
-#include <map>
-
-#include <string>
-#include <future>
-#include <vector>
 
 #include "md5.h"
+
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <vector>
 
 namespace
 {
   namespace fs = std::filesystem;
+
+  struct CantOpenFileException : public std::logic_error
+  {
+    explicit CantOpenFileException(const fs::path &filePath)
+      : logic_error("Can't open file: " + filePath.string())
+    {}
+
+  };
 
   std::string getFileMD5Hash(const fs::path& filePath)
   {
     std::ifstream file(filePath, std::ios::binary | std::ios::in);
 
     if (!file.is_open())
-      throw std::logic_error("Can't open file: " + filePath.string() + ".");
+      throw CantOpenFileException(filePath);
 
     const auto fragmentSize = 512U;
     std::string fileContent;
@@ -54,8 +61,16 @@ std::vector<std::vector<std::filesystem::path>> findSimilarFileSets(const std::f
   std::map<std::string, std::vector<fs::path>> hashToPaths;
   for (const auto& filePath: files)
   {
-    const auto hash = getFileMD5Hash(filePath);
-    hashToPaths[hash].push_back(filePath);
+    try
+    {
+      const auto hash = getFileMD5Hash(filePath);
+      hashToPaths[hash].push_back(filePath);
+    }
+    catch (const CantOpenFileException& cantOpenErr)
+    {
+      //just note and skip
+      std::cerr << cantOpenErr.what() << std::endl;
+    }
   }
 
   std::vector<std::vector<fs::path>> result;
